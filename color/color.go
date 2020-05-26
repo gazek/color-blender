@@ -1,7 +1,6 @@
 package color
 
 import (
-	"fmt"
 	ic "image/color"
 	"sort"
 )
@@ -123,7 +122,6 @@ func (c *Color) applyWhiteLevel(color ic.RGBA, whiteLevel uint8) ic.RGBA {
 	}
 	// get the color dominance
 	dom := c.getColorDominance(&result)
-	fmt.Printf("whiteLevel: %v\n", whiteLevel)
 	// modify the white level
 	for i := 0; i < 3; i++ {
 		adj := uint8((int(*dom[0] - *dom[i])) * int(whiteLevel) / 255)
@@ -146,7 +144,6 @@ func (c *Color) normalizeRGBLevels(color ic.RGBA) ic.RGBA {
 	dom := c.getColorDominance(&result)
 	// modify the white level
 	adj := 255 / float32(*dom[0])
-	fmt.Printf("adj: %v\n", adj)
 	for i := 0; i < 3; i++ {
 		*dom[i] = uint8(float32(*dom[i]) * adj)
 	}
