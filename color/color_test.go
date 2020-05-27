@@ -144,3 +144,94 @@ func TestGetBaseColor(t *testing.T) {
 		}
 	}
 }
+
+func TestSetBrightness(t *testing.T) {
+	tests := []struct {
+		color ic.RGBA
+		alpha uint8
+	}{
+		{ic.RGBA{R: 255, G: 150, B: 0, A: 200}, 123},
+	}
+
+	for test := range tests {
+		c := Color{color: tests[test].color}
+		c.SetBrightness(tests[test].alpha)
+		if c.color.A != tests[test].alpha {
+			t.Errorf("Wanted %v, got: %v", tests[test].alpha, c.color.A)
+		}
+	}
+}
+
+func TestSetColor(t *testing.T) {
+	tests := []struct {
+		color ic.RGBA
+	}{
+		{ic.RGBA{R: 255, G: 150, B: 25, A: 200}},
+	}
+
+	for test := range tests {
+		c := Color{}
+		c.SetColor(tests[test].color)
+		// the color should be stored
+		if c.color != tests[test].color {
+			t.Errorf("Wanted %v, got: %v", tests[test].color, c.color)
+		}
+		// the base color should be set
+		if &c.baseColor == nil {
+			t.Error("Failed to set base color")
+		}
+		// the white level should be set
+		if c.whiteLevel == 0 {
+			t.Error("Failed to set whiteLevel")
+		}
+	}
+}
+
+func TestNewColor(t *testing.T) {
+	tests := []struct {
+		color ic.RGBA
+	}{
+		{ic.RGBA{R: 255, G: 150, B: 25, A: 200}},
+	}
+
+	for test := range tests {
+		// call the func
+		c := NewColor(tests[test].color)
+		// the colors should be the same
+		if tests[test].color != c.color {
+			t.Errorf("Wanted %v, got: %v", tests[test].color, c.color)
+		}
+		// the base color should be set
+		if &c.baseColor == nil {
+			t.Error("Failed to set base color")
+		}
+		// the white level should be set
+		if c.whiteLevel == 0 {
+			t.Error("Failed to set whiteLevel")
+		}
+	}
+}
+
+func TestSetWhiteLevel(t *testing.T) {
+	tests := []struct {
+		color      ic.RGBA
+		whiteLevel uint8
+		want       ic.RGBA
+	}{
+		{ic.RGBA{R: 255, G: 150, B: 25, A: 200}, 0, ic.RGBA{R: 255, G: 138, B: 0, A: 200}},
+		{ic.RGBA{R: 255, G: 138, B: 0, A: 200}, 25, ic.RGBA{R: 255, G: 149, B: 25, A: 200}},
+	}
+
+	for test := range tests {
+		c := Color{color: tests[test].color}
+		c.SetWhiteLevel(tests[test].whiteLevel)
+		// the color should be stored
+		if c.color != tests[test].want {
+			t.Errorf("Wanted %v, got: %v", tests[test].want, c.color)
+		}
+		// the white level should be set
+		if c.whiteLevel != tests[test].whiteLevel {
+			t.Error("Failed to set whiteLevel")
+		}
+	}
+}

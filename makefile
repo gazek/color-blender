@@ -13,6 +13,6 @@ build_win: test
 	$(GOBUILD) -o $(BINARY_NAME).exe -v
 test:
 	$(GOTEST) -v -cover ./...
-test_coverage_report:
+coverage:
 	-$(GOTEST) -v -coverprofile=coverage.out ./...
 	$(GOTOOL) cover -html=coverage.out

@@ -113,12 +113,16 @@ func (c *Color) getWhiteLevel(color ic.RGBA, dominance []*uint8) uint8 {
 func (c *Color) applyWhiteLevel(color ic.RGBA, whiteLevel uint8) ic.RGBA {
 	// get the white level components of the color
 	wlc := c.getWhiteLevelComponent(color)
-	// create a new RGB object to store the resulting color
+	// create a new RGB object that contains the color with zero white level
 	result := ic.RGBA{
 		R: color.R - wlc.R,
 		G: color.G - wlc.G,
 		B: color.B - wlc.B,
 		A: color.A,
+	}
+	// if the white level is zero then we are done
+	if whiteLevel == 0 {
+		return result
 	}
 	// get the color dominance
 	dom := c.getColorDominance(&result)
