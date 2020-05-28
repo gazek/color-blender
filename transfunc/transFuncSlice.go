@@ -13,8 +13,16 @@ func (s *transFuncSlice) SetFuncs(funcs []transFuncer) {
 	s.setPeriod()
 }
 
+// AppendFunc appends a transFuncer to the slice
 func (s *transFuncSlice) AppendFunc(f transFuncer) {
+	// append the transFuncer
 	s.funcs = append(s.funcs, f)
+	// calculate the period
+	if s.period == 0 {
+		s.setPeriod()
+	} else {
+		s.period = s.period + f.GetFuncPeriod()
+	}
 }
 
 func (s *transFuncSlice) setPeriod() {
@@ -27,6 +35,7 @@ func (s *transFuncSlice) setPeriod() {
 	s.period = period
 }
 
+// GetFuncValue returns the value of the function at the given step
 func (s *transFuncSlice) GetFuncValue(stepNum int) float32 {
 	// mod the step number
 	minStep := stepNum % s.period
@@ -42,7 +51,7 @@ func (s *transFuncSlice) getFunctionIndex(stepNum int) (index int, localStep int
 	// find the function index
 	boundary := 0
 	for f := range s.funcs {
-		if minStep < boundary+s.funcs[f].GetFuncPeriod() {
+		if minStep <= boundary+s.funcs[f].GetFuncPeriod() {
 			localStep = minStep - boundary
 			break
 		}

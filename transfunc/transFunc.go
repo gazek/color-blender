@@ -17,6 +17,11 @@ func (f *transFunc) GetFuncPeriod() int {
 }
 
 func (f *transFunc) GetFuncValue(stepNum int) float32 {
+	// make sure the input range is valid
+	if len(f.InputRange) != 2 {
+		// set to zero value
+		f.InputRange = []float32{0, 0}
+	}
 	// find the input value
 	stepMin := stepNum % f.Period
 	posInRange := float32(stepMin) / float32(f.Period)
