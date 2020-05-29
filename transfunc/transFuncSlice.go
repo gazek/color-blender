@@ -36,13 +36,13 @@ func (s *transFuncSlice) setPeriod() {
 }
 
 // GetFuncValue returns the value of the function at the given step
-func (s *transFuncSlice) GetFuncValue(stepNum int) float32 {
+func (s *transFuncSlice) GetFuncValue(stepNum int) (float32, transFuncer) {
 	// mod the step number
 	minStep := stepNum % s.period
 	// find the function index
 	index, localStep := s.getFunctionIndex(minStep)
 	// get the function value
-	return s.funcs[index].GetFuncValue(localStep)
+	return s.funcs[index].GetFuncValue(localStep), s.funcs[index]
 }
 
 func (s *transFuncSlice) getFunctionIndex(stepNum int) (index int, localStep int) {
@@ -59,4 +59,8 @@ func (s *transFuncSlice) getFunctionIndex(stepNum int) (index int, localStep int
 		boundary += s.funcs[f].GetFuncPeriod()
 	}
 	return index, localStep
+}
+
+func (s *transFuncSlice) GetPeriod() int {
+	return s.period
 }

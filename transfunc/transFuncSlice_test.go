@@ -111,9 +111,19 @@ func TestGetFunctionValue(t *testing.T) {
 				Function: func(x float32) float32 { return returnValue },
 			})
 		}
-		result := s.GetFuncValue(tests[test].stepNum)
+		result, _ := s.GetFuncValue(tests[test].stepNum)
 		if result != tests[test].want {
 			t.Errorf("index Wanted %v, got: %v", tests[test].want, result)
 		}
+	}
+}
+
+func TestGetPeriod(t *testing.T) {
+	period := 42
+	s := transFuncSlice{}
+	s.AppendFunc(&transFunc{Period: period})
+	// check that the array was stored
+	if result := s.GetPeriod(); result != period {
+		t.Errorf("Wanted: %v, found: %v", period, result)
 	}
 }

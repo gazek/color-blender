@@ -9,7 +9,6 @@ type transFunc struct {
 	Function   func(x float32) float32
 	Period     int
 	InputRange []float32 // left inclusive, right exclusive
-	TransType  string    // "base", "white", "black"
 }
 
 func (f *transFunc) GetFuncPeriod() int {
