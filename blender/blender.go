@@ -58,9 +58,9 @@ func (b *Blender) GetColor() *color.Color {
 	// create a new Color object to hold the result
 	result := &color.Color{}
 	// get the color func value
-	cfv, c1, c2, transType := b.colorFuncs.GetFuncValue(b.step)
+	cfv, cf := b.colorFuncs.GetFuncValue(b.step)
 	// get the base color resulting from the func value
-	result.SetColor(b.getColorTransition(c1, c2, cfv, transType))
+	result.SetColor(b.getTransitionColor(cfv, cf))
 	// get the brightness func value
 	bfv := b.brightnessFuncs.GetFuncValue(b.step)
 	// apply the brightness to the base color
@@ -73,8 +73,19 @@ func (b *Blender) GetColor() *color.Color {
 	return result
 }
 
-func (b *Blender) getColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, transVal float32, transType string) imageColor.RGBA {
-	panic("NotImplemented")
+func (b *Blender) getTransitionColor(transVal float32, colorFunc *transfunc.ColorFunc) imageColor.RGBA {
+	// get the full transition distance if we don't already have it
+
+	// find the distance for the given transVal
+
+	// get color1 base color
+
+	// get color2 base color
+
+	// call the function for the given TransType
+
+	// return the color
+
 }
 
 // // GetColorWindow calculates the colors for the next n step positions, where n is the length of the slice pointer provided

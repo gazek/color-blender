@@ -31,6 +31,7 @@ type ColorFunc struct {
 	Color1    color.RGBA
 	Color2    color.RGBA
 	TransType string // "base", "white", "black"
+	TransDist int
 	transFunc
 }
 
@@ -38,11 +39,8 @@ type ColorFunc struct {
 type ColorFuncSlice struct{ transFuncSlice }
 
 // GetFuncValue returns the function value for the given step and the anchor colors
-func (c *ColorFuncSlice) GetFuncValue(stepNum int) (funcVal float32, color1 color.RGBA, color2 color.RGBA, transType string) {
+func (c *ColorFuncSlice) GetFuncValue(stepNum int) (float32, *ColorFunc) {
 	funcVal, tf := c.transFuncSlice.GetFuncValue(stepNum)
 	cf := tf.(*ColorFunc)
-	color1 = cf.Color1
-	color2 = cf.Color2
-	transType = cf.TransType
-	return funcVal, color1, color2, transType
+	return funcVal, cf
 }

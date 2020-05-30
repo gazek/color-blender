@@ -77,18 +77,18 @@ func TestColorGetFuncValue(t *testing.T) {
 		}
 		s := &ColorFuncSlice{}
 		s.SetFuncs(funcs)
-		funcVal, color1, color2, transType := s.GetFuncValue(1)
+		funcVal, cf := s.GetFuncValue(1)
 		if funcVal != tests[test].funcVal {
 			t.Errorf("Wanted %v, got: %v", tests[test].funcVal, funcVal)
 		}
-		if color1 != tests[test].color1 {
-			t.Errorf("Wanted %v, got: %v", tests[test].color1, color1)
+		if cf.Color1 != tests[test].color1 {
+			t.Errorf("Wanted %v, got: %v", tests[test].color1, cf.Color1)
 		}
-		if color2 != tests[test].color2 {
-			t.Errorf("Wanted %v, got: %v", tests[test].color2, color2)
+		if cf.Color2 != tests[test].color2 {
+			t.Errorf("Wanted %v, got: %v", tests[test].color2, cf.Color2)
 		}
-		if transType != tests[test].transType {
-			t.Errorf("Wanted %v, got: %v", tests[test].transType, transType)
+		if cf.TransType != tests[test].transType {
+			t.Errorf("Wanted %v, got: %v", tests[test].transType, cf.TransType)
 		}
 	}
 }
