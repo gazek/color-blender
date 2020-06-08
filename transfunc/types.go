@@ -30,7 +30,7 @@ type WhiteLevelFuncSlice struct{ transFuncSlice }
 type ColorFunc struct {
 	Color1    color.RGBA
 	Color2    color.RGBA
-	TransType string // "base", "white", "black"
+	TransType TransType
 	TransDist int
 	transFunc
 }
@@ -43,4 +43,22 @@ func (c *ColorFuncSlice) GetFuncValue(stepNum int) (float32, *ColorFunc) {
 	funcVal, tf := c.transFuncSlice.GetFuncValue(stepNum)
 	cf := tf.(*ColorFunc)
 	return funcVal, cf
+}
+
+// TransType defines the type of transition
+type TransType int
+
+const (
+	// OneAtATime changes only one color component at a time
+	OneAtATime TransType = iota
+	// AllAtOnce changes all of the color component at the same time
+	AllAtOnce
+	// ToWhite tansitions from color1 to white to color2
+	ToWhite
+	// ToBlack tansitions from color1 to black to color2
+	ToBlack
+)
+
+func (t TransType) String() string {
+	return [...]string{"OneAtATime", "AllAtOnce", "ToWhite", "ToBlack"}[t]
 }

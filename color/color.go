@@ -2,6 +2,7 @@ package color
 
 import (
 	ic "image/color"
+	"math"
 	"sort"
 )
 
@@ -14,7 +15,6 @@ const (
 
 // Color type RGBA
 type Color struct {
-	baseColor  ic.RGBA
 	color      ic.RGBA
 	whiteLevel uint8
 }
@@ -29,7 +29,7 @@ func NewColor(color ic.RGBA) *Color {
 // SetColor sets the RGBA color
 func (c *Color) SetColor(color ic.RGBA) {
 	c.color = color
-	c.baseColor = c.getBaseColor(color)
+	// c.baseColor = c.getBaseColor(color)
 	c.whiteLevel = c.getWhiteLevel(color, nil)
 }
 
@@ -44,8 +44,13 @@ func (c *Color) SetWhiteLevel(whiteLevel uint8) {
 	c.color = c.applyWhiteLevel(c.color, whiteLevel)
 }
 
-// getBaseColor removes white and black from an rgb color
-func (c *Color) getBaseColor(color ic.RGBA) ic.RGBA {
+// GetColor returns the current color
+func (c *Color) GetColor() ic.RGBA {
+	return c.color
+}
+
+// GetBaseColor removes white and black from an rgb color
+func (c *Color) GetBaseColor(color ic.RGBA) ic.RGBA {
 	// check if the color is true white
 	if c.isWhite(color) {
 		return ic.RGBA{R: whiteBaseR, G: whiteBaseG, B: whiteBaseB, A: color.A}
@@ -59,14 +64,63 @@ func (c *Color) getBaseColor(color ic.RGBA) ic.RGBA {
 	return baseColor
 }
 
-// getColorDominance returns a slice of pointers sorted descending by color component value
-func (c *Color) getColorDominance(color *ic.RGBA) []*uint8 {
+// GetColorDominance returns a slice of pointers and color component names sorted descending by color component value
+func (c *Color) GetColorDominance(color *ic.RGBA) (domPointers []*uint8, names []string) {
 	// create a slice of pointers to the RGB values
-	rgbPointers := []*uint8{&color.R, &color.G, &color.B}
+	domPointers = []*uint8{&color.R, &color.G, &color.B}
 	// sort the slice by the underlying uint8 values
-	sort.SliceStable(rgbPointers, func(i, j int) bool { return *rgbPointers[j] < *rgbPointers[i] })
-	// return the sorted slice
-	return rgbPointers
+	sort.SliceStable(domPointers, func(i, j int) bool { return *domPointers[j] < *domPointers[i] })
+	// get the names of each location
+	names = c.getcolorDominanceNames(color, domPointers)
+	// return the sorted slice and names
+	return domPointers, names
+}
+
+// getcolorDominanceNames returns the color component names sorted descending by color component value
+func (c *Color) getcolorDominanceNames(color *ic.RGBA, domPointers []*uint8) []string {
+	var result []string
+	for d := range domPointers {
+		switch domPointers[d] {
+		case &color.R:
+			result = append(result, "R")
+		case &color.G:
+			result = append(result, "G")
+		case &color.B:
+			result = append(result, "B")
+		default:
+			panic("Failed to match dominance component")
+		}
+	}
+	return result
+}
+
+// GetComponentValue returns the component value of the color by component string
+func (c *Color) GetComponentValue(compName string) uint8 {
+	switch compName {
+	case "R":
+		return c.color.R
+	case "G":
+		return c.color.G
+	case "B":
+		return c.color.B
+	default:
+		panic("Invalid color component name")
+	}
+}
+
+// SetComponentValue set the R, G or B component value
+func (c *Color) SetComponentValue(compName string, value uint8) {
+	// set the color component
+	switch compName {
+	case "R":
+		c.color.R = value
+	case "G":
+		c.color.G = value
+	case "B":
+		c.color.B = value
+	}
+	// set the color
+	c.SetColor(c.color)
 }
 
 // isWhite check if a color is true white
@@ -87,10 +141,10 @@ func (c *Color) getWhiteLevelComponent(color ic.RGBA) ic.RGBA {
 	// general case
 	whiteLevelComp := ic.RGBA{R: color.R, G: color.G, B: color.B}
 	// get component dominaces if needed
-	dominance := c.getColorDominance(&whiteLevelComp)
+	dominance, _ := c.GetColorDominance(&whiteLevelComp)
 	// calculate the middle dominnce component's white level amount
 	whiteLevel := c.getWhiteLevel(whiteLevelComp, dominance)
-	*dominance[1] = *dominance[1] - uint8(((int(*dominance[1])*255)-int(*dominance[0])*int(whiteLevel))/(255-int(whiteLevel)))
+	*dominance[1] = *dominance[1] - uint8(((int(*dominance[1])*math.MaxUint8)-int(*dominance[0])*int(whiteLevel))/(math.MaxUint8-int(whiteLevel)))
 	// set dominant color component to 0 since none of it contributes to white
 	*dominance[0] = 0
 	// we leave the least dominant color component as is, since all of its value contributes to the white level
@@ -101,12 +155,12 @@ func (c *Color) getWhiteLevelComponent(color ic.RGBA) ic.RGBA {
 // getWhiteLevel calculates the white level of the color
 func (c *Color) getWhiteLevel(color ic.RGBA, dominance []*uint8) uint8 {
 	if dominance == nil {
-		dominance = c.getColorDominance(&color)
+		dominance, _ = c.GetColorDominance(&color)
 	}
 	if *dominance[0] == 0 {
 		return 0
 	}
-	return uint8(255 * float32(*dominance[2]) / float32(*dominance[0]))
+	return uint8(math.MaxUint8 * float32(*dominance[2]) / float32(*dominance[0]))
 }
 
 // applyWhiteLevel applies a white level to a color
@@ -125,10 +179,10 @@ func (c *Color) applyWhiteLevel(color ic.RGBA, whiteLevel uint8) ic.RGBA {
 		return result
 	}
 	// get the color dominance
-	dom := c.getColorDominance(&result)
+	dom, _ := c.GetColorDominance(&result)
 	// modify the white level
 	for i := 0; i < 3; i++ {
-		adj := uint8((int(*dom[0] - *dom[i])) * int(whiteLevel) / 255)
+		adj := uint8((int(*dom[0] - *dom[i])) * int(whiteLevel) / math.MaxUint8)
 		*dom[i] += adj
 	}
 	// return the new color
@@ -145,9 +199,9 @@ func (c *Color) normalizeRGBLevels(color ic.RGBA) ic.RGBA {
 		A: color.A,
 	}
 	// get the color dominance
-	dom := c.getColorDominance(&result)
+	dom, _ := c.GetColorDominance(&result)
 	// modify the white level
-	adj := 255 / float32(*dom[0])
+	adj := math.MaxUint8 / float32(*dom[0])
 	for i := 0; i < 3; i++ {
 		*dom[i] = uint8(float32(*dom[i]) * adj)
 	}

@@ -56,11 +56,11 @@ func TestColorGetFuncValue(t *testing.T) {
 		funcVal   float32
 		color1    imageColor.RGBA
 		color2    imageColor.RGBA
-		transType string
+		transType TransType
 	}{
-		{1.0, imageColor.RGBA{R: 50}, imageColor.RGBA{B: 100}, "base"},
-		{1.0, imageColor.RGBA{G: 150}, imageColor.RGBA{B: 200}, "base"},
-		{1.0, imageColor.RGBA{R: 75}, imageColor.RGBA{B: 175}, "base"},
+		{1.0, imageColor.RGBA{R: 50}, imageColor.RGBA{B: 100}, AllAtOnce},
+		{1.0, imageColor.RGBA{G: 150}, imageColor.RGBA{B: 200}, AllAtOnce},
+		{1.0, imageColor.RGBA{R: 75}, imageColor.RGBA{B: 175}, AllAtOnce},
 	}
 
 	for test := range tests {
@@ -69,6 +69,7 @@ func TestColorGetFuncValue(t *testing.T) {
 				tests[test].color1,
 				tests[test].color2,
 				tests[test].transType,
+				0,
 				transFunc{
 					Period:   1,
 					Function: func(x float32) float32 { return tests[test].funcVal },

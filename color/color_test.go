@@ -8,8 +8,14 @@ import (
 func TestGetColorDominanceSort(t *testing.T) {
 	color := ic.RGBA{R: 1, G: 2, B: 3, A: 4}
 	c := Color{}
-	d := c.getColorDominance(&color)
+	d, names := c.GetColorDominance(&color)
+	wantNames := []string{"B", "G", "R"}
 	want := []uint8{3, 2, 1}
+	for i := range wantNames {
+		if wantNames[i] != names[i] {
+			t.Errorf("Want: %v, found: %v", wantNames[i], names[i])
+		}
+	}
 	for i := range want {
 		if *d[i] != want[i] {
 			t.Errorf("Want: %v, found: %v", want[i], *d[i])
@@ -20,8 +26,14 @@ func TestGetColorDominanceSort(t *testing.T) {
 func TestGetColorDominanceSortStability(t *testing.T) {
 	color := ic.RGBA{R: 0, G: 0, B: 0, A: 4}
 	c := Color{}
-	d := c.getColorDominance(&color)
+	d, names := c.GetColorDominance(&color)
 	want := []uint8{1, 2, 3}
+	wantNames := []string{"R", "G", "B"}
+	for i := range wantNames {
+		if wantNames[i] != names[i] {
+			t.Errorf("Want: %v, found: %v", wantNames[i], names[i])
+		}
+	}
 	for i := range want {
 		*d[i] = want[i]
 	}
@@ -29,6 +41,19 @@ func TestGetColorDominanceSortStability(t *testing.T) {
 	for i := range comp {
 		if comp[i] != want[i] {
 			t.Errorf("Want: %v, found: %v", want[i], comp[i])
+		}
+	}
+}
+
+func TestGetComponentValue(t *testing.T) {
+	color := ic.RGBA{R: 1, G: 2, B: 3, A: 4}
+	c := Color{color: color}
+	want := []uint8{1, 2, 3}
+	keys := []string{"R", "G", "B"}
+	for i := range keys {
+		result := c.GetComponentValue(keys[i])
+		if want[i] != result {
+			t.Errorf("Want: %v, found: %v", want[i], result)
 		}
 	}
 }
@@ -139,7 +164,7 @@ func TestGetBaseColor(t *testing.T) {
 
 	c := Color{}
 	for test := range tests {
-		if result := c.getBaseColor(tests[test].color); result != tests[test].want {
+		if result := c.GetBaseColor(tests[test].color); result != tests[test].want {
 			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
 		}
 	}
@@ -176,10 +201,6 @@ func TestSetColor(t *testing.T) {
 		if c.color != tests[test].color {
 			t.Errorf("Wanted %v, got: %v", tests[test].color, c.color)
 		}
-		// the base color should be set
-		if &c.baseColor == nil {
-			t.Error("Failed to set base color")
-		}
 		// the white level should be set
 		if c.whiteLevel == 0 {
 			t.Error("Failed to set whiteLevel")
@@ -200,10 +221,6 @@ func TestNewColor(t *testing.T) {
 		// the colors should be the same
 		if tests[test].color != c.color {
 			t.Errorf("Wanted %v, got: %v", tests[test].color, c.color)
-		}
-		// the base color should be set
-		if &c.baseColor == nil {
-			t.Error("Failed to set base color")
 		}
 		// the white level should be set
 		if c.whiteLevel == 0 {
