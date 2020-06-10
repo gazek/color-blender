@@ -58,6 +58,29 @@ func TestGetComponentValue(t *testing.T) {
 	}
 }
 
+func TestSetComponentValue(t *testing.T) {
+	color := ic.RGBA{R: 1, G: 2, B: 3, A: 4}
+	c := Color{color: color}
+	want := []uint8{10, 9, 8}
+	keys := []string{"R", "G", "B"}
+	for i := range keys {
+		c.SetComponentValue(keys[i], want[i])
+		result := c.GetComponentValue(keys[i])
+		if want[i] != result {
+			t.Errorf("Want: %v, found: %v", want[i], result)
+		}
+	}
+}
+
+func TestGetColor(t *testing.T) {
+	color := ic.RGBA{R: 1, G: 2, B: 3, A: 4}
+	c := Color{color: color}
+	result := c.GetColor()
+	if color != result {
+		t.Errorf("Want: %v, found: %v", color, result)
+	}
+}
+
 func TestIsWhite(t *testing.T) {
 	tests := []struct {
 		color ic.RGBA

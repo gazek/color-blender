@@ -45,8 +45,28 @@ func (b *Blender) AppendWhiteLevelFunc(f transfunc.WhiteLevelFunc) {
 	b.whiteLevelFuncs.AppendFunc(&f)
 }
 
+// GetColor calculates the color for the current step position
+func (b *Blender) GetColor() *color.Color {
+	// create a new Color object to hold the result
+	result := &color.Color{}
+	// get the color func value
+	cfv, cf := b.colorFuncs.GetFuncValue(b.step)
+	// get the base color resulting from the func value
+	result.SetColor(b.getTransitionColor(cfv, cf))
+	// get the brightness func value
+	bfv := b.brightnessFuncs.GetFuncValue(b.step)
+	// apply the brightness to the base color
+	result.SetBrightness(bfv)
+	// get the white level func value
+	wlfv := b.whiteLevelFuncs.GetFuncValue(b.step)
+	// apply the white level to the base color
+	result.SetWhiteLevel(wlfv)
+	// return the resulting color
+	return result
+}
+
 func (b *Blender) getPeriod() int {
-	// I don't want to write a LCM function
+	// I don't want to write an LCM function
 	// so I'll just do it the easy way
 	isZero := true
 	period := 1
@@ -70,26 +90,7 @@ func (b *Blender) getPeriod() int {
 	return period
 }
 
-// GetColor calculates the color for the current step position
-func (b *Blender) GetColor() *color.Color {
-	// create a new Color object to hold the result
-	result := &color.Color{}
-	// get the color func value
-	cfv, cf := b.colorFuncs.GetFuncValue(b.step)
-	// get the base color resulting from the func value
-	result.SetColor(b.getTransitionColor(cfv, cf))
-	// get the brightness func value
-	bfv := b.brightnessFuncs.GetFuncValue(b.step)
-	// apply the brightness to the base color
-	result.SetBrightness(bfv)
-	// get the white level func value
-	wlfv := b.whiteLevelFuncs.GetFuncValue(b.step)
-	// apply the white level to the base color
-	result.SetWhiteLevel(wlfv)
-	// return the resulting color
-	return result
-}
-
+// getTransitionColor calculates the max tranversal distance and calls getColorTransitionColor
 func (b *Blender) getTransitionColor(transVal float32, colorFunc *transfunc.ColorFunc) imageColor.RGBA {
 	// get the full transition distance if we don't already have it
 	if colorFunc.TransDist < 0 {
@@ -102,40 +103,44 @@ func (b *Blender) getTransitionColor(transVal float32, colorFunc *transfunc.Colo
 	return b.getColorTransitionColor(colorFunc, dist)
 }
 
-func (b *Blender) getColorTransTypeFunc(transType transfunc.TransType) func(colorFunc *transfunc.ColorFunc, maxDist int) (color imageColor.RGBA, distTraveled int) {
+// getColorTransTypeFunc selects the transition function
+func (b *Blender) getColorTransTypeFunc(transType transfunc.TransType) func(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (color imageColor.RGBA, distTraveled int) {
 	switch transType {
 	case transfunc.OneAtATime:
 		return b.oneAtATimeColorTransition
 	case transfunc.AllAtOnce:
 		return b.allAtOnceColorTransition
 	case transfunc.ToWhite:
-		return b.toWhiteColorTransition
+		return b.whiteColorTransition
 	case transfunc.ToBlack:
-		return b.toBlackColorTransition
+		return b.blackColorTransition
 	default:
 		panic(fmt.Sprintf("Invalid color transition type: %v", transType))
 	}
 }
 
+// getColorTransitionDistance sets colorFunc.TransDist to the full transition distance
 func (b *Blender) getColorTransitionDistance(colorFunc *transfunc.ColorFunc) {
 	transTypeFunc := b.getColorTransTypeFunc(colorFunc.TransType)
-	_, colorFunc.TransDist = transTypeFunc(colorFunc, math.MaxUint8*4)
+	_, colorFunc.TransDist = transTypeFunc(colorFunc.Color1, colorFunc.Color2, math.MaxUint8*4)
 }
 
+// getColorTransitionColor retreives the transition function and gets the transition color
 func (b *Blender) getColorTransitionColor(colorFunc *transfunc.ColorFunc, transDist int) imageColor.RGBA {
 	transTypeFunc := b.getColorTransTypeFunc(colorFunc.TransType)
-	color, _ := transTypeFunc(colorFunc, transDist)
+	color, _ := transTypeFunc(colorFunc.Color1, colorFunc.Color2, transDist)
 	return color
 }
 
-func (b *Blender) oneAtATimeColorTransition(colorFunc *transfunc.ColorFunc, maxDist int) (resultingColor imageColor.RGBA, distance int) {
+// oneAtATimeColorTransition transitions between colors by changing only one component value at a time
+func (b *Blender) oneAtATimeColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (resultingColor imageColor.RGBA, distance int) {
 	// track the transition distance
 	var dist int
 	// initialize the RGBA to color1
-	result := color.NewColor(colorFunc.Color1)
+	result := color.NewColor(color1)
 	// get the components by dmominance
-	c1DomPtrs, c1DomNames := color.NewColor(colorFunc.Color1).GetColorDominance(&colorFunc.Color1)
-	c2DomPtrs, c2DomNames := color.NewColor(colorFunc.Color2).GetColorDominance(&colorFunc.Color2)
+	c1DomPtrs, c1DomNames := color.NewColor(color1).GetColorDominance(&color1)
+	c2DomPtrs, c2DomNames := color.NewColor(color2).GetColorDominance(&color2)
 	// avoid backtracking across the same path
 	if *c1DomPtrs[1] != *c2DomPtrs[0] {
 		// result[c1.d1] => 0
@@ -151,13 +156,30 @@ func (b *Blender) oneAtATimeColorTransition(colorFunc *transfunc.ColorFunc, maxD
 	return result.GetColor(), dist
 }
 
+// allAtOnceColorTransition transitions between colors by changing all component values at once, moving them directly toward the target values
+func (b *Blender) allAtOnceColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (color imageColor.RGBA, distance int) {
+	return imageColor.RGBA{}, 0
+}
+
+// whiteColorTransition similar to allAtOnceColorTransition but transitions to white before transitioning to the target values
+func (b *Blender) whiteColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (color imageColor.RGBA, distance int) {
+	return imageColor.RGBA{}, 0
+}
+
+// blackColorTransition similar to allAtOnceColorTransition but transitions to black before transitioning to the target values
+func (b *Blender) blackColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (color imageColor.RGBA, distance int) {
+	return imageColor.RGBA{}, 0
+}
+
+// setComponentWithConstraint sets a color component value but restricts the amount the value can deviate from its current value
 func (b *Blender) setComponentWithConstraint(color *color.Color, compName string, value uint8, maxDist int) (distTraveled int) {
 	// check the base case
 	if maxDist <= 0 {
 		return 0
 	}
 	// calculate the component change
-	change := value - color.GetComponentValue(compName)
+	compValue := color.GetComponentValue(compName)
+	change := int(value) - int(compValue)
 	// get the distance
 	dist := int(math.Abs(float64(change)))
 	// set the component value
@@ -173,18 +195,6 @@ func (b *Blender) setComponentWithConstraint(color *color.Color, compName string
 		distTraveled = maxDist
 	}
 	return distTraveled
-}
-
-func (b *Blender) allAtOnceColorTransition(colorFunc *transfunc.ColorFunc, maxDist int) (color imageColor.RGBA, distance int) {
-	return imageColor.RGBA{}, 0
-}
-
-func (b *Blender) toWhiteColorTransition(colorFunc *transfunc.ColorFunc, maxDist int) (color imageColor.RGBA, distance int) {
-	return imageColor.RGBA{}, 0
-}
-
-func (b *Blender) toBlackColorTransition(colorFunc *transfunc.ColorFunc, maxDist int) (color imageColor.RGBA, distance int) {
-	return imageColor.RGBA{}, 0
 }
 
 // // GetColorWindow calculates the colors for the next n step positions, where n is the length of the slice pointer provided
