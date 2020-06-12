@@ -5,6 +5,17 @@ import "image/color"
 // BrightnessFunc stores a function that describes how to modify the brightness (alpha) of a Color
 type BrightnessFunc struct{ transFunc }
 
+// NewBrightnessFunc creates a new BrightnessFunc object
+func NewBrightnessFunc(f func(x float32) float32, period int, inputRange []float32) BrightnessFunc {
+	return BrightnessFunc{
+		transFunc{
+			Function:   f,
+			Period:     period,
+			InputRange: inputRange,
+		},
+	}
+}
+
 // BrightnessFuncSlice holds a slice of BrightnessFuncs
 type BrightnessFuncSlice struct{ transFuncSlice }
 
@@ -16,6 +27,17 @@ func (b *BrightnessFuncSlice) GetFuncValue(stepNum int) uint8 {
 
 // WhiteLevelFunc stores a function that describes how to modify the white level of a Color
 type WhiteLevelFunc struct{ transFunc }
+
+// NewWhiteLevelFunc creates a new WhiteLevelFunc object
+func NewWhiteLevelFunc(f func(x float32) float32, period int, inputRange []float32) WhiteLevelFunc {
+	return WhiteLevelFunc{
+		transFunc{
+			Function:   f,
+			Period:     period,
+			InputRange: inputRange,
+		},
+	}
+}
 
 // GetFuncValue returns the function value for the given step and the anchor colors
 func (w *WhiteLevelFuncSlice) GetFuncValue(stepNum int) uint8 {
@@ -33,6 +55,20 @@ type ColorFunc struct {
 	TransType TransType
 	TransDist int
 	transFunc
+}
+
+// NewColorFunc creates a new NewColorFunc object
+func NewColorFunc(color1 color.RGBA, color2 color.RGBA, transType TransType, f func(x float32) float32, period int, inputRange []float32) ColorFunc {
+	return ColorFunc{
+		Color1:    color1,
+		Color2:    color2,
+		TransType: transType,
+		transFunc: transFunc{
+			Function:   f,
+			Period:     period,
+			InputRange: inputRange,
+		},
+	}
 }
 
 // ColorFuncSlice holds a slice of ColorFuncs
