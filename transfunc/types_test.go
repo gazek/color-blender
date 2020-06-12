@@ -93,3 +93,25 @@ func TestColorGetFuncValue(t *testing.T) {
 		}
 	}
 }
+
+func TestTransTypeString(t *testing.T) {
+	tests := map[string]TransType{
+		"OneAtATime": OneAtATime,
+		"AllAtOnce":  AllAtOnce,
+		"ToWhite":    ToWhite,
+		"ToBlack":    ToBlack,
+	}
+	want := []string{
+		"OneAtATime",
+		"AllAtOnce",
+		"ToWhite",
+		"ToBlack",
+	}
+	for index := range want {
+		w := want[index]
+		if tests[w].String() != w {
+			t.Errorf("Wanted %v, got: %v", w, tests[w].String())
+
+		}
+	}
+}

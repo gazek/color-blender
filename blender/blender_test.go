@@ -74,6 +74,7 @@ func TestGetColorTransitionColorAndDistance(t *testing.T) {
 		wantDist  int
 		wantColor ic.RGBA
 	}{
+		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 255, G: 0, B: 0}, transfunc.OneAtATime, 0.5, 0, ic.RGBA{R: 255, G: 0, B: 0}},
 		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 0, G: 255, B: 0}, transfunc.OneAtATime, 0.5, 510, ic.RGBA{R: 255, G: 255, B: 0}},
 		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 0, G: 255, B: 0}, transfunc.OneAtATime, 0, 510, ic.RGBA{R: 255, G: 0, B: 0}},
 		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 0, G: 255, B: 0}, transfunc.OneAtATime, 1, 510, ic.RGBA{R: 0, G: 255, B: 0}},
@@ -94,6 +95,37 @@ func TestGetColorTransitionColorAndDistance(t *testing.T) {
 			t.Errorf("Wanted: %v, got: %v", test.wantDist, cf.TransDist)
 		}
 		color := b.getColorTransitionColor(cf, int(math.Round(float64(test.wantDist)*test.percent)))
+		if color != test.wantColor {
+			t.Errorf("Wanted %v, got: %v", test.wantColor, color)
+		}
+	}
+}
+
+func TestGetTransitionColor(t *testing.T) {
+	tests := []struct {
+		color1    ic.RGBA
+		color2    ic.RGBA
+		transType transfunc.TransType
+		percent   float64
+		wantDist  int
+		wantColor ic.RGBA
+	}{
+		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 0, G: 255, B: 0}, transfunc.OneAtATime, 0.5, 510, ic.RGBA{R: 255, G: 255, B: 0}},
+		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 0, G: 255, B: 0}, transfunc.OneAtATime, 0, 510, ic.RGBA{R: 255, G: 0, B: 0}},
+		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 0, G: 255, B: 0}, transfunc.OneAtATime, 1, 510, ic.RGBA{R: 0, G: 255, B: 0}},
+		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 0, G: 255, B: 0}, transfunc.OneAtATime, 0.33333, 510, ic.RGBA{R: 255, G: 170, B: 0}},
+		{ic.RGBA{R: 255, G: 0, B: 0}, ic.RGBA{R: 0, G: 45, B: 255}, transfunc.OneAtATime, 0.75, 555, ic.RGBA{R: 94, G: 0, B: 255}},
+	}
+
+	b := &Blender{}
+	for index := range tests {
+		test := tests[index]
+		cf := &transfunc.ColorFunc{
+			Color1:    test.color1,
+			Color2:    test.color2,
+			TransType: test.transType,
+		}
+		color := b.getTransitionColor(float32(test.percent), cf)
 		if color != test.wantColor {
 			t.Errorf("Wanted %v, got: %v", test.wantColor, color)
 		}

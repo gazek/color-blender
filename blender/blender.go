@@ -93,11 +93,11 @@ func (b *Blender) getPeriod() int {
 // getTransitionColor calculates the max tranversal distance and calls getColorTransitionColor
 func (b *Blender) getTransitionColor(transVal float32, colorFunc *transfunc.ColorFunc) imageColor.RGBA {
 	// get the full transition distance if we don't already have it
-	if colorFunc.TransDist < 0 {
+	if colorFunc.TransDist <= 0 {
 		b.getColorTransitionDistance(colorFunc)
 	}
 	// find the distance for the given transVal
-	dist := int(transVal * float32(colorFunc.TransDist))
+	dist := int(math.Round(float64(transVal * float32(colorFunc.TransDist))))
 	// call the function for the given TransType
 	// and get the transition color
 	return b.getColorTransitionColor(colorFunc, dist)
@@ -121,6 +121,12 @@ func (b *Blender) getColorTransTypeFunc(transType transfunc.TransType) func(colo
 
 // getColorTransitionDistance sets colorFunc.TransDist to the full transition distance
 func (b *Blender) getColorTransitionDistance(colorFunc *transfunc.ColorFunc) {
+	// if the colors are equal, return 0
+	if colorFunc.Color1 == colorFunc.Color2 {
+		colorFunc.TransDist = 0
+		return
+	}
+	// walk the traversal and get the distance
 	transTypeFunc := b.getColorTransTypeFunc(colorFunc.TransType)
 	_, colorFunc.TransDist = transTypeFunc(colorFunc.Color1, colorFunc.Color2, math.MaxUint8*4)
 }
