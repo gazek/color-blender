@@ -131,3 +131,214 @@ func TestGetTransitionColor(t *testing.T) {
 		}
 	}
 }
+
+func TestGetPeriod(t *testing.T) {
+	tests := []struct {
+		colorFuncPeriod      int
+		brightnessFuncPeriod int
+		whiteLevelFuncPeriod int
+		want                 int
+	}{
+		{0, 0, 0, 0},
+		{1, 2, 3, 6},
+	}
+
+	for index := range tests {
+		test := tests[index]
+		b := Blender{}
+		cf := transfunc.ColorFunc{}
+		cf.Period = test.colorFuncPeriod
+		b.AppendColorFunc(cf)
+		bf := transfunc.BrightnessFunc{}
+		bf.Period = test.brightnessFuncPeriod
+		b.AppendBrightnessFunc(bf)
+		wf := transfunc.WhiteLevelFunc{}
+		wf.Period = test.whiteLevelFuncPeriod
+		b.AppendWhiteLevelFunc(wf)
+		period := b.getPeriod()
+		if period != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, period)
+		}
+	}
+}
+
+func TestAdvanceStepAndResetStep(t *testing.T) {
+	tests := []struct {
+		colorFuncPeriod      int
+		brightnessFuncPeriod int
+		whiteLevelFuncPeriod int
+		stepStart            int
+		step                 int
+		want                 int
+	}{
+		{1, 2, 3, 0, 1, 1},
+		{1, 2, 3, 1, 1, 2},
+		{1, 2, 3, 5, 2, 1},
+		{1, 2, 3, -3, 7, 4},
+		{1, 2, 3, 4, -9999, 0},
+		{0, 0, 0, 0, 10, 0},
+	}
+
+	for index := range tests {
+		test := tests[index]
+		// build the blender
+		b := Blender{}
+		cf := transfunc.ColorFunc{}
+		cf.Period = test.colorFuncPeriod
+		b.AppendColorFunc(cf)
+		bf := transfunc.BrightnessFunc{}
+		bf.Period = test.brightnessFuncPeriod
+		b.AppendBrightnessFunc(bf)
+		wf := transfunc.WhiteLevelFunc{}
+		wf.Period = test.whiteLevelFuncPeriod
+		b.AppendWhiteLevelFunc(wf)
+		// set the step
+		b.step = test.stepStart
+		// advance the step
+		b.AdvanceStep(test.step)
+		if b.step != test.want {
+			t.Errorf("Wanted: %v, found: %v", test.want, b.step)
+		}
+		// reset step
+		b.ResetStep()
+		if b.step != 0 {
+			t.Errorf("Wanted: %v, found: %v", 0, b.step)
+		}
+	}
+}
+
+func TestGetGetColor(t *testing.T) {
+	tests := []struct {
+		color1               ic.RGBA
+		color2               ic.RGBA
+		transType            transfunc.TransType
+		colorFunc            func(x float32) float32
+		colorFuncRange       []float32
+		colorFuncPeriod      int
+		whiteLevelFunc       func(x float32) float32
+		whiteLevelFuncRange  []float32
+		whiteLevelFuncPeriod int
+		brightnessFunc       func(x float32) float32
+		brightnessFuncRange  []float32
+		brightnessFuncPeriod int
+		step                 int
+		want                 ic.RGBA
+	}{
+		{
+			color1:    ic.RGBA{R: 255},
+			color2:    ic.RGBA{B: 255},
+			transType: transfunc.OneAtATime,
+			colorFunc: func(x float32) float32 {
+				if x < 5 {
+					return 0
+				}
+				return 1
+			},
+			colorFuncRange:  []float32{0, 10},
+			colorFuncPeriod: 10,
+			whiteLevelFunc: func(x float32) float32 {
+				if x < 5 {
+					return 0
+				}
+				return 1
+			},
+			whiteLevelFuncRange:  []float32{0, 10},
+			whiteLevelFuncPeriod: 10,
+			brightnessFunc: func(x float32) float32 {
+				if x < 5 {
+					return 0
+				}
+				return 1
+			},
+			brightnessFuncRange:  []float32{0, 10},
+			brightnessFuncPeriod: 10,
+			step:                 0,
+			want:                 ic.RGBA{R: 255},
+		},
+		{
+			color1:    ic.RGBA{R: 255},
+			color2:    ic.RGBA{B: 255},
+			transType: transfunc.OneAtATime,
+			colorFunc: func(x float32) float32 {
+				if x < 5 {
+					return 0
+				}
+				return 1
+			},
+			colorFuncRange:  []float32{0, 10},
+			colorFuncPeriod: 10,
+			whiteLevelFunc: func(x float32) float32 {
+				if x < 10 {
+					return 0
+				}
+				return 1
+			},
+			whiteLevelFuncRange:  []float32{0, 10},
+			whiteLevelFuncPeriod: 10,
+			brightnessFunc: func(x float32) float32 {
+				if x < 5 {
+					return 0
+				}
+				return 1
+			},
+			brightnessFuncRange:  []float32{0, 10},
+			brightnessFuncPeriod: 10,
+			step:                 9,
+			want:                 ic.RGBA{B: 255, A: 255},
+		},
+		{
+			color1:    ic.RGBA{R: 255},
+			color2:    ic.RGBA{B: 255},
+			transType: transfunc.OneAtATime,
+			colorFunc: func(x float32) float32 {
+				if x < 5 {
+					return 0
+				}
+				return 1
+			},
+			colorFuncRange:  []float32{0, 10},
+			colorFuncPeriod: 10,
+			whiteLevelFunc: func(x float32) float32 {
+				if x < 5 {
+					return 0
+				}
+				return 1
+			},
+			whiteLevelFuncRange:  []float32{0, 10},
+			whiteLevelFuncPeriod: 10,
+			brightnessFunc: func(x float32) float32 {
+				if x < 10 {
+					return 0
+				}
+				return 1
+			},
+			brightnessFuncRange:  []float32{0, 10},
+			brightnessFuncPeriod: 10,
+			step:                 9,
+			want:                 ic.RGBA{R: 255, G: 255, B: 255, A: 0},
+		},
+	}
+
+	for index := range tests {
+		test := tests[index]
+		// create the blender
+		b := Blender{}
+		// add color func
+		cf := transfunc.NewColorFunc(test.color1, test.color2, test.transType, test.colorFunc, test.colorFuncPeriod, test.colorFuncRange)
+		b.AppendColorFunc(cf)
+		// add white level func
+		wf := transfunc.NewWhiteLevelFunc(test.whiteLevelFunc, test.whiteLevelFuncPeriod, test.whiteLevelFuncRange)
+		b.AppendWhiteLevelFunc(wf)
+		// add brightness func
+		bf := transfunc.NewBrightnessFunc(test.brightnessFunc, test.brightnessFuncPeriod, test.brightnessFuncRange)
+		b.AppendBrightnessFunc(bf)
+		// set the step
+		b.AdvanceStep(test.step)
+		// get the color
+		color := b.GetColor()
+		// check the result
+		if color.GetColor() != test.want {
+			t.Errorf("Wanted: %v, found: %v", test.want, color.GetColor())
+		}
+	}
+}

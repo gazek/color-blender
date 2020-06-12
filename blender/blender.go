@@ -26,8 +26,17 @@ func (b *Blender) ResetStep() {
 func (b *Blender) AdvanceStep(numSteps int) {
 	// get a common period
 	period := b.getPeriod()
+	// handle period of zero
+	if period == 0 {
+		b.step = 0
+		return
+	}
 	// set the step
 	b.step = (b.step + numSteps) % period
+	// don't let the step position go negative
+	if b.step < 0 {
+		b.step = 0
+	}
 }
 
 // AppendColorFunc appends the ColorFunc to the ColorFuncSlice
