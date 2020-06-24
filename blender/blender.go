@@ -175,8 +175,12 @@ func (b *Blender) _oneAtATimeColorTransition(color1 imageColor.RGBA, color2 imag
 }
 
 // allAtOnceColorTransition transitions between colors by changing all component values at once, moving them directly toward the target values
-func (b *Blender) allAtOnceColorTransition(colorFunc *transfunc.ColorFunc, transPercent float64) imageColor.RGBA {
-	return imageColor.RGBA{}
+func (b *Blender) allAtOnceColorTransition(cf *transfunc.ColorFunc, transPercent float64) imageColor.RGBA {
+	return imageColor.RGBA{
+		R: cf.Color1.R + uint8(float64((cf.Color2.R-cf.Color1.R))*transPercent),
+		G: cf.Color1.G + uint8(float64((cf.Color2.G-cf.Color1.G))*transPercent),
+		B: cf.Color1.B + uint8(float64((cf.Color2.B-cf.Color1.B))*transPercent),
+	}
 }
 
 // whiteColorTransition similar to allAtOnceColorTransition but transitions to white before transitioning to the target values
