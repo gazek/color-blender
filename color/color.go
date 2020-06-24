@@ -3,7 +3,6 @@ package color
 import (
 	ic "image/color"
 	"math"
-	"sort"
 )
 
 const (
@@ -68,12 +67,27 @@ func (c *Color) GetBaseColor(color ic.RGBA) ic.RGBA {
 func (c *Color) GetColorDominance(color *ic.RGBA) (domPointers []*uint8, names []string) {
 	// create a slice of pointers to the RGB values
 	domPointers = []*uint8{&color.R, &color.G, &color.B}
-	// sort the slice by the underlying uint8 values
-	sort.SliceStable(domPointers, func(i, j int) bool { return *domPointers[j] < *domPointers[i] })
-	// get the names of each location
+	// sort the pointers
+	domPointers = sortDomPointers(domPointers)
+	// get the names slice
 	names = c.getcolorDominanceNames(color, domPointers)
 	// return the sorted slice and names
 	return domPointers, names
+}
+
+// sortDomPointers is an insertion sort implementation which is needed because
+// TinyGo panics on sort.Slice/SliceStable because reflect.Swapper is not impemented
+func sortDomPointers(a []*uint8) []*uint8 {
+	for i := 1; i < len(a); i++ {
+		j := i
+		for j > 0 {
+			if *a[j-1] < *a[j] {
+				a[j-1], a[j] = a[j], a[j-1]
+			}
+			j = j - 1
+		}
+	}
+	return a
 }
 
 // getcolorDominanceNames returns the color component names sorted descending by color component value
@@ -160,7 +174,7 @@ func (c *Color) getWhiteLevel(color ic.RGBA, dominance []*uint8) uint8 {
 	if *dominance[0] == 0 {
 		return 0
 	}
-	return uint8(math.MaxUint8 * float32(*dominance[2]) / float32(*dominance[0]))
+	return uint8(int(math.MaxUint8) * int(*dominance[2]) / int(*dominance[0]))
 }
 
 // applyWhiteLevel applies a white level to a color
@@ -189,7 +203,7 @@ func (c *Color) applyWhiteLevel(color ic.RGBA, whiteLevel uint8) ic.RGBA {
 	return result
 }
 
-// applyWhiteLevel applies a white level to a color
+// normalizeRGBLevels removes white from a color
 func (c *Color) normalizeRGBLevels(color ic.RGBA) ic.RGBA {
 	// create a new RGB object to store the resulting color
 	result := ic.RGBA{
@@ -200,10 +214,17 @@ func (c *Color) normalizeRGBLevels(color ic.RGBA) ic.RGBA {
 	}
 	// get the color dominance
 	dom, _ := c.GetColorDominance(&result)
+	// check base case
+	if *dom[0] == 0 {
+		result.R = whiteBaseR
+		result.G = whiteBaseG
+		result.B = whiteBaseB
+		return result
+	}
 	// modify the white level
-	adj := math.MaxUint8 / float32(*dom[0])
+	dom0 := int(*dom[0])
 	for i := 0; i < 3; i++ {
-		*dom[i] = uint8(float32(*dom[i]) * adj)
+		*dom[i] = uint8((int(*dom[i]) * int(math.MaxUint8)) / dom0)
 	}
 	return result
 }

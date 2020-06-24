@@ -20,9 +20,14 @@ func NewBrightnessFunc(f func(x float32) float32, period int, inputRange []float
 type BrightnessFuncSlice struct{ transFuncSlice }
 
 // GetFuncValue returns the function value for the given step and the anchor colors
-func (b *BrightnessFuncSlice) GetFuncValue(stepNum int) uint8 {
-	funcVal, _ := b.transFuncSlice.GetFuncValue(stepNum)
-	return uint8(0xff * funcVal)
+func (b *BrightnessFuncSlice) GetFuncValue(stepNum int) (uint8, bool) {
+	funcVal, f := b.transFuncSlice.GetFuncValue(stepNum)
+	// make sure there are functions defined
+	ok := true
+	if f == nil {
+		ok = false
+	}
+	return uint8(0xff * funcVal), ok
 }
 
 // WhiteLevelFunc stores a function that describes how to modify the white level of a Color
@@ -40,9 +45,14 @@ func NewWhiteLevelFunc(f func(x float32) float32, period int, inputRange []float
 }
 
 // GetFuncValue returns the function value for the given step and the anchor colors
-func (w *WhiteLevelFuncSlice) GetFuncValue(stepNum int) uint8 {
-	funcVal, _ := w.transFuncSlice.GetFuncValue(stepNum)
-	return uint8(0xff * funcVal)
+func (w *WhiteLevelFuncSlice) GetFuncValue(stepNum int) (uint8, bool) {
+	funcVal, f := w.transFuncSlice.GetFuncValue(stepNum)
+	// make sure there are functions defined
+	ok := true
+	if f == nil {
+		ok = false
+	}
+	return uint8(0xff * funcVal), ok
 }
 
 // WhiteLevelFuncSlice holds a slice of WhiteLevelFuncs

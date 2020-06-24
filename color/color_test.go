@@ -165,6 +165,7 @@ func TestNormalizeRGBLevels(t *testing.T) {
 	}{
 		{ic.RGBA{R: 255, G: 150, B: 0}, ic.RGBA{R: 255, G: 150, B: 0}},
 		{ic.RGBA{R: 150, G: 75, B: 25}, ic.RGBA{R: 255, G: 127, B: 42}},
+		{ic.RGBA{R: 0, G: 0, B: 0}, ic.RGBA{R: whiteBaseR, G: whiteBaseG, B: whiteBaseB}},
 	}
 
 	c := Color{}

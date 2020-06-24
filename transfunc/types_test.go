@@ -22,7 +22,7 @@ func TestBrightnessGetFuncValue(t *testing.T) {
 		}
 		s := &BrightnessFuncSlice{}
 		s.SetFuncs(funcs)
-		if result := s.GetFuncValue(1); result != tests[test].want {
+		if result, _ := s.GetFuncValue(1); result != tests[test].want {
 			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
 		}
 	}
@@ -45,7 +45,7 @@ func TestWhiteLevelGetFuncValue(t *testing.T) {
 		}
 		s := &WhiteLevelFuncSlice{}
 		s.SetFuncs(funcs)
-		if result := s.GetFuncValue(1); result != tests[test].want {
+		if result, _ := s.GetFuncValue(1); result != tests[test].want {
 			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
 		}
 	}

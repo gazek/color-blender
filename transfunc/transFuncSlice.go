@@ -37,6 +37,9 @@ func (s *transFuncSlice) setPeriod() {
 
 // GetFuncValue returns the value of the function at the given step
 func (s *transFuncSlice) GetFuncValue(stepNum int) (float32, transFuncer) {
+	if len(s.funcs) == 0 {
+		return 0, nil
+	}
 	// mod the step number
 	minStep := stepNum % s.period
 	// find the function index

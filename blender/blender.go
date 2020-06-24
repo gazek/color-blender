@@ -63,13 +63,17 @@ func (b *Blender) GetColor() *color.Color {
 	// get the base color resulting from the func value
 	result.SetColor(b.getTransitionColor(cfv, cf))
 	// get the brightness func value
-	bfv := b.brightnessFuncs.GetFuncValue(b.step)
+	bfv, ok := b.brightnessFuncs.GetFuncValue(b.step)
 	// apply the brightness to the base color
-	result.SetBrightness(bfv)
+	if ok {
+		result.SetBrightness(bfv)
+	}
 	// get the white level func value
-	wlfv := b.whiteLevelFuncs.GetFuncValue(b.step)
+	wlfv, ok := b.whiteLevelFuncs.GetFuncValue(b.step)
 	// apply the white level to the base color
-	result.SetWhiteLevel(wlfv)
+	if ok {
+		result.SetWhiteLevel(wlfv)
+	}
 	// return the resulting color
 	return result
 }
