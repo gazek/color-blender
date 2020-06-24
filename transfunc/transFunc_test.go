@@ -6,20 +6,20 @@ import (
 
 func TestGetFuncValue(t *testing.T) {
 	tests := []struct {
-		function   func(x float32) float32
+		function   func(x float64) float64
 		period     int
-		inputRange []float32
+		inputRange []float64
 		stepNum    int
-		want       float32
+		want       float64
 	}{
-		{func(x float32) float32 { return 10 - x }, 10, []float32{0, 10}, 5, 5},
-		{func(x float32) float32 { return 10 - x }, 10, []float32{0, 10}, 17, 3},
+		{func(x float64) float64 { return 10 - x }, 10, []float64{0, 10}, 5, 5},
+		{func(x float64) float64 { return 10 - x }, 10, []float64{0, 10}, 17, 3},
 	}
 
-	for test := range tests {
-		f := transFunc{Function: tests[test].function, Period: tests[test].period, InputRange: tests[test].inputRange}
-		if result := f.GetFuncValue(tests[test].stepNum); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+	for _, test := range tests {
+		f := transFunc{Function: test.function, Period: test.period, InputRange: test.inputRange}
+		if result := f.GetFuncValue(test.stepNum); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
@@ -31,10 +31,10 @@ func TestGetFuncPeriod(t *testing.T) {
 		{10},
 	}
 
-	for test := range tests {
-		f := transFunc{Period: tests[test].period}
-		if result := f.GetFuncPeriod(); result != tests[test].period {
-			t.Errorf("Wanted %v, got: %v", tests[test].period, result)
+	for _, test := range tests {
+		f := transFunc{Period: test.period}
+		if result := f.GetFuncPeriod(); result != test.period {
+			t.Errorf("Wanted %v, got: %v", test.period, result)
 		}
 	}
 }

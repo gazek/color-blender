@@ -92,9 +92,9 @@ func TestIsWhite(t *testing.T) {
 	}
 
 	c := Color{}
-	for test := range tests {
-		if result := c.isWhite(tests[test].color); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+	for _, test := range tests {
+		if result := c.isWhite(test.color); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
@@ -111,9 +111,9 @@ func TestGetWhiteLevel(t *testing.T) {
 	}
 
 	c := Color{}
-	for test := range tests {
-		if result := c.getWhiteLevel(tests[test].color, nil); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+	for _, test := range tests {
+		if result := c.getWhiteLevel(test.color, nil); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
@@ -131,9 +131,9 @@ func TestGetWhiteLevelComponent(t *testing.T) {
 	}
 
 	c := Color{}
-	for test := range tests {
-		if result := c.getWhiteLevelComponent(tests[test].color); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+	for _, test := range tests {
+		if result := c.getWhiteLevelComponent(test.color); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
@@ -151,9 +151,9 @@ func TestApplyWhiteLevel(t *testing.T) {
 	}
 
 	c := Color{}
-	for test := range tests {
-		if result := c.applyWhiteLevel(tests[test].color, tests[test].whiteLevel); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+	for _, test := range tests {
+		if result := c.applyWhiteLevel(test.color, test.whiteLevel); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
@@ -169,9 +169,9 @@ func TestNormalizeRGBLevels(t *testing.T) {
 	}
 
 	c := Color{}
-	for test := range tests {
-		if result := c.normalizeRGBLevels(tests[test].color); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+	for _, test := range tests {
+		if result := c.normalizeRGBLevels(test.color); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
@@ -187,9 +187,9 @@ func TestGetBaseColor(t *testing.T) {
 	}
 
 	c := Color{}
-	for test := range tests {
-		if result := c.GetBaseColor(tests[test].color); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+	for _, test := range tests {
+		if result := c.GetBaseColor(test.color); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
@@ -202,11 +202,11 @@ func TestSetBrightness(t *testing.T) {
 		{ic.RGBA{R: 255, G: 150, B: 0, A: 200}, 123},
 	}
 
-	for test := range tests {
-		c := Color{color: tests[test].color}
-		c.SetBrightness(tests[test].alpha)
-		if c.color.A != tests[test].alpha {
-			t.Errorf("Wanted %v, got: %v", tests[test].alpha, c.color.A)
+	for _, test := range tests {
+		c := Color{color: test.color}
+		c.SetBrightness(test.alpha)
+		if c.color.A != test.alpha {
+			t.Errorf("Wanted %v, got: %v", test.alpha, c.color.A)
 		}
 	}
 }
@@ -218,12 +218,12 @@ func TestSetColor(t *testing.T) {
 		{ic.RGBA{R: 255, G: 150, B: 25, A: 200}},
 	}
 
-	for test := range tests {
+	for _, test := range tests {
 		c := Color{}
-		c.SetColor(tests[test].color)
+		c.SetColor(test.color)
 		// the color should be stored
-		if c.color != tests[test].color {
-			t.Errorf("Wanted %v, got: %v", tests[test].color, c.color)
+		if c.color != test.color {
+			t.Errorf("Wanted %v, got: %v", test.color, c.color)
 		}
 		// the white level should be set
 		if c.whiteLevel == 0 {
@@ -239,12 +239,12 @@ func TestNewColor(t *testing.T) {
 		{ic.RGBA{R: 255, G: 150, B: 25, A: 200}},
 	}
 
-	for test := range tests {
+	for _, test := range tests {
 		// call the func
-		c := NewColor(tests[test].color)
+		c := NewColor(test.color)
 		// the colors should be the same
-		if tests[test].color != c.color {
-			t.Errorf("Wanted %v, got: %v", tests[test].color, c.color)
+		if test.color != c.color {
+			t.Errorf("Wanted %v, got: %v", test.color, c.color)
 		}
 		// the white level should be set
 		if c.whiteLevel == 0 {
@@ -263,15 +263,15 @@ func TestSetWhiteLevel(t *testing.T) {
 		{ic.RGBA{R: 255, G: 138, B: 0, A: 200}, 25, ic.RGBA{R: 255, G: 149, B: 25, A: 200}},
 	}
 
-	for test := range tests {
-		c := Color{color: tests[test].color}
-		c.SetWhiteLevel(tests[test].whiteLevel)
+	for _, test := range tests {
+		c := Color{color: test.color}
+		c.SetWhiteLevel(test.whiteLevel)
 		// the color should be stored
-		if c.color != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, c.color)
+		if c.color != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, c.color)
 		}
 		// the white level should be set
-		if c.whiteLevel != tests[test].whiteLevel {
+		if c.whiteLevel != test.whiteLevel {
 			t.Error("Failed to set whiteLevel")
 		}
 	}

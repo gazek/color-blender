@@ -7,7 +7,7 @@ import (
 
 func TestBrightnessGetFuncValue(t *testing.T) {
 	tests := []struct {
-		funcVal float32
+		funcVal float64
 		want    uint8
 	}{
 		{1.0, 255},
@@ -15,22 +15,22 @@ func TestBrightnessGetFuncValue(t *testing.T) {
 		{0.55, 140},
 	}
 
-	for test := range tests {
+	for _, test := range tests {
 		funcs := []transFuncer{
-			&transFunc{Period: 1, Function: func(x float32) float32 { return tests[test].funcVal }},
-			&transFunc{Period: 1, Function: func(x float32) float32 { return tests[test].funcVal }},
+			&transFunc{Period: 1, Function: func(x float64) float64 { return test.funcVal }},
+			&transFunc{Period: 1, Function: func(x float64) float64 { return test.funcVal }},
 		}
 		s := &BrightnessFuncSlice{}
 		s.SetFuncs(funcs)
-		if result, _ := s.GetFuncValue(1); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+		if result, _ := s.GetFuncValue(1); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
 
 func TestWhiteLevelGetFuncValue(t *testing.T) {
 	tests := []struct {
-		funcVal float32
+		funcVal float64
 		want    uint8
 	}{
 		{1.0, 255},
@@ -38,22 +38,22 @@ func TestWhiteLevelGetFuncValue(t *testing.T) {
 		{0.55, 140},
 	}
 
-	for test := range tests {
+	for _, test := range tests {
 		funcs := []transFuncer{
-			&transFunc{Period: 1, Function: func(x float32) float32 { return tests[test].funcVal }},
-			&transFunc{Period: 1, Function: func(x float32) float32 { return tests[test].funcVal }},
+			&transFunc{Period: 1, Function: func(x float64) float64 { return test.funcVal }},
+			&transFunc{Period: 1, Function: func(x float64) float64 { return test.funcVal }},
 		}
 		s := &WhiteLevelFuncSlice{}
 		s.SetFuncs(funcs)
-		if result, _ := s.GetFuncValue(1); result != tests[test].want {
-			t.Errorf("Wanted %v, got: %v", tests[test].want, result)
+		if result, _ := s.GetFuncValue(1); result != test.want {
+			t.Errorf("Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
 
 func TestColorGetFuncValue(t *testing.T) {
 	tests := []struct {
-		funcVal   float32
+		funcVal   float64
 		color1    imageColor.RGBA
 		color2    imageColor.RGBA
 		transType TransType
@@ -63,33 +63,33 @@ func TestColorGetFuncValue(t *testing.T) {
 		{1.0, imageColor.RGBA{R: 75}, imageColor.RGBA{B: 175}, AllAtOnce},
 	}
 
-	for test := range tests {
+	for _, test := range tests {
 		funcs := []transFuncer{
 			&ColorFunc{
-				tests[test].color1,
-				tests[test].color2,
-				tests[test].transType,
+				test.color1,
+				test.color2,
+				test.transType,
 				0,
 				transFunc{
 					Period:   1,
-					Function: func(x float32) float32 { return tests[test].funcVal },
+					Function: func(x float64) float64 { return test.funcVal },
 				},
 			},
 		}
 		s := &ColorFuncSlice{}
 		s.SetFuncs(funcs)
 		funcVal, cf := s.GetFuncValue(1)
-		if funcVal != tests[test].funcVal {
-			t.Errorf("Wanted %v, got: %v", tests[test].funcVal, funcVal)
+		if funcVal != test.funcVal {
+			t.Errorf("Wanted %v, got: %v", test.funcVal, funcVal)
 		}
-		if cf.Color1 != tests[test].color1 {
-			t.Errorf("Wanted %v, got: %v", tests[test].color1, cf.Color1)
+		if cf.Color1 != test.color1 {
+			t.Errorf("Wanted %v, got: %v", test.color1, cf.Color1)
 		}
-		if cf.Color2 != tests[test].color2 {
-			t.Errorf("Wanted %v, got: %v", tests[test].color2, cf.Color2)
+		if cf.Color2 != test.color2 {
+			t.Errorf("Wanted %v, got: %v", test.color2, cf.Color2)
 		}
-		if cf.TransType != tests[test].transType {
-			t.Errorf("Wanted %v, got: %v", tests[test].transType, cf.TransType)
+		if cf.TransType != test.transType {
+			t.Errorf("Wanted %v, got: %v", test.transType, cf.TransType)
 		}
 	}
 }

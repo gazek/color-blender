@@ -36,7 +36,7 @@ func (s *transFuncSlice) setPeriod() {
 }
 
 // GetFuncValue returns the value of the function at the given step
-func (s *transFuncSlice) GetFuncValue(stepNum int) (float32, transFuncer) {
+func (s *transFuncSlice) GetFuncValue(stepNum int) (float64, transFuncer) {
 	if len(s.funcs) == 0 {
 		return 0, nil
 	}

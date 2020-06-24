@@ -104,20 +104,20 @@ func (b *Blender) getPeriod() int {
 }
 
 // getTransitionColor calculates the max tranversal distance and calls getColorTransitionColor
-func (b *Blender) getTransitionColor(transVal float32, colorFunc *transfunc.ColorFunc) imageColor.RGBA {
-	// get the full transition distance if we don't already have it
-	if colorFunc.TransDist <= 0 {
-		b.getColorTransitionDistance(colorFunc)
-	}
+func (b *Blender) getTransitionColor(transVal float64, colorFunc *transfunc.ColorFunc) imageColor.RGBA {
+	// // get the full transition distance if we don't already have it
+	// if colorFunc.TransDist <= 0 {
+	// 	b.getColorTransitionDistance(colorFunc)
+	// }
 	// find the distance for the given transVal
-	dist := int(math.Round(float64(transVal * float32(colorFunc.TransDist))))
+	// dist := int(math.Round(transVal * float64(colorFunc.TransDist)))
 	// call the function for the given TransType
 	// and get the transition color
-	return b.getColorTransitionColor(colorFunc, dist)
+	return b.getColorTransitionColor(colorFunc, transVal)
 }
 
 // getColorTransTypeFunc selects the transition function
-func (b *Blender) getColorTransTypeFunc(transType transfunc.TransType) func(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (color imageColor.RGBA, distTraveled int) {
+func (b *Blender) getColorTransTypeFunc(transType transfunc.TransType) func(colorFunc *transfunc.ColorFunc, transPercent float64) imageColor.RGBA {
 	switch transType {
 	case transfunc.OneAtATime:
 		return b.oneAtATimeColorTransition
@@ -132,27 +132,26 @@ func (b *Blender) getColorTransTypeFunc(transType transfunc.TransType) func(colo
 	}
 }
 
-// getColorTransitionDistance sets colorFunc.TransDist to the full transition distance
-func (b *Blender) getColorTransitionDistance(colorFunc *transfunc.ColorFunc) {
-	// if the colors are equal, return 0
-	if colorFunc.Color1 == colorFunc.Color2 {
-		colorFunc.TransDist = 0
-		return
-	}
-	// walk the traversal and get the distance
-	transTypeFunc := b.getColorTransTypeFunc(colorFunc.TransType)
-	_, colorFunc.TransDist = transTypeFunc(colorFunc.Color1, colorFunc.Color2, math.MaxUint8*4)
-}
-
 // getColorTransitionColor retreives the transition function and gets the transition color
-func (b *Blender) getColorTransitionColor(colorFunc *transfunc.ColorFunc, transDist int) imageColor.RGBA {
+func (b *Blender) getColorTransitionColor(colorFunc *transfunc.ColorFunc, transPercent float64) imageColor.RGBA {
 	transTypeFunc := b.getColorTransTypeFunc(colorFunc.TransType)
-	color, _ := transTypeFunc(colorFunc.Color1, colorFunc.Color2, transDist)
+	color := transTypeFunc(colorFunc, transPercent)
 	return color
 }
 
 // oneAtATimeColorTransition transitions between colors by changing only one component value at a time
-func (b *Blender) oneAtATimeColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (resultingColor imageColor.RGBA, distance int) {
+func (b *Blender) oneAtATimeColorTransition(colorFunc *transfunc.ColorFunc, transPercent float64) imageColor.RGBA {
+	// get the full transition distance if we don't already have it
+	if colorFunc.TransDist <= 0 {
+		_, colorFunc.TransDist = b._oneAtATimeColorTransition(colorFunc.Color1, colorFunc.Color2, 4*math.MaxUint8)
+	}
+	maxDist := int(math.Round(transPercent * float64(colorFunc.TransDist)))
+	color, _ := b._oneAtATimeColorTransition(colorFunc.Color1, colorFunc.Color2, maxDist)
+	return color
+}
+
+// oneAtATimeColorTransition transitions between colors by changing only one component value at a time
+func (b *Blender) _oneAtATimeColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (resultingColor imageColor.RGBA, distance int) {
 	// track the transition distance
 	var dist int
 	// initialize the RGBA to color1
@@ -176,18 +175,18 @@ func (b *Blender) oneAtATimeColorTransition(color1 imageColor.RGBA, color2 image
 }
 
 // allAtOnceColorTransition transitions between colors by changing all component values at once, moving them directly toward the target values
-func (b *Blender) allAtOnceColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (color imageColor.RGBA, distance int) {
-	return imageColor.RGBA{}, 0
+func (b *Blender) allAtOnceColorTransition(colorFunc *transfunc.ColorFunc, transPercent float64) imageColor.RGBA {
+	return imageColor.RGBA{}
 }
 
 // whiteColorTransition similar to allAtOnceColorTransition but transitions to white before transitioning to the target values
-func (b *Blender) whiteColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (color imageColor.RGBA, distance int) {
-	return imageColor.RGBA{}, 0
+func (b *Blender) whiteColorTransition(colorFunc *transfunc.ColorFunc, transPercent float64) imageColor.RGBA {
+	return imageColor.RGBA{}
 }
 
 // blackColorTransition similar to allAtOnceColorTransition but transitions to black before transitioning to the target values
-func (b *Blender) blackColorTransition(color1 imageColor.RGBA, color2 imageColor.RGBA, maxDist int) (color imageColor.RGBA, distance int) {
-	return imageColor.RGBA{}, 0
+func (b *Blender) blackColorTransition(colorFunc *transfunc.ColorFunc, transPercent float64) imageColor.RGBA {
+	return imageColor.RGBA{}
 }
 
 // setComponentWithConstraint sets a color component value but restricts the amount the value can deviate from its current value

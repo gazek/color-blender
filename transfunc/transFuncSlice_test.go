@@ -75,17 +75,17 @@ func TestGetFunctionIndex(t *testing.T) {
 		{[]int{5, 15, 10}, 20, 1, 15},
 	}
 
-	for test := range tests {
+	for _, test := range tests {
 		s := transFuncSlice{}
-		for f := range tests[test].periods {
-			s.AppendFunc(&transFunc{Period: tests[test].periods[f]})
+		for f := range test.periods {
+			s.AppendFunc(&transFunc{Period: test.periods[f]})
 		}
-		index, localStep := s.getFunctionIndex(tests[test].stepNum)
-		if index != tests[test].index {
-			t.Errorf("index Wanted %v, got: %v", tests[test].index, index)
+		index, localStep := s.getFunctionIndex(test.stepNum)
+		if index != test.index {
+			t.Errorf("index Wanted %v, got: %v", test.index, index)
 		}
-		if localStep != tests[test].localStep {
-			t.Errorf("localStep Wanted %v, got: %v", tests[test].localStep, localStep)
+		if localStep != test.localStep {
+			t.Errorf("localStep Wanted %v, got: %v", test.localStep, localStep)
 		}
 	}
 }
@@ -94,7 +94,7 @@ func TestGetFunctionValue(t *testing.T) {
 	tests := []struct {
 		periods []int
 		stepNum int
-		want    float32
+		want    float64
 	}{
 		{[]int{5, 15, 10}, 7, 15},
 		{[]int{5, 15, 10}, 33, 5},
@@ -102,18 +102,18 @@ func TestGetFunctionValue(t *testing.T) {
 		{[]int{5, 15, 10}, 20, 15},
 	}
 
-	for test := range tests {
+	for _, test := range tests {
 		s := transFuncSlice{}
-		for f := range tests[test].periods {
-			returnValue := float32(tests[test].periods[f])
+		for f := range test.periods {
+			returnValue := float64(test.periods[f])
 			s.AppendFunc(&transFunc{
-				Period:   tests[test].periods[f],
-				Function: func(x float32) float32 { return returnValue },
+				Period:   test.periods[f],
+				Function: func(x float64) float64 { return returnValue },
 			})
 		}
-		result, _ := s.GetFuncValue(tests[test].stepNum)
-		if result != tests[test].want {
-			t.Errorf("index Wanted %v, got: %v", tests[test].want, result)
+		result, _ := s.GetFuncValue(test.stepNum)
+		if result != test.want {
+			t.Errorf("index Wanted %v, got: %v", test.want, result)
 		}
 	}
 }
