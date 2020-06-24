@@ -7,7 +7,7 @@ import (
 
 func TestBrightnessGetFuncValue(t *testing.T) {
 	tests := []struct {
-		funcVal float64
+		funcVal float32
 		want    uint8
 	}{
 		{1.0, 255},
@@ -17,8 +17,8 @@ func TestBrightnessGetFuncValue(t *testing.T) {
 
 	for _, test := range tests {
 		funcs := []transFuncer{
-			&transFunc{Period: 1, Function: func(x float64) float64 { return test.funcVal }},
-			&transFunc{Period: 1, Function: func(x float64) float64 { return test.funcVal }},
+			&transFunc{Period: 1, Function: func(x float32) float32 { return test.funcVal }},
+			&transFunc{Period: 1, Function: func(x float32) float32 { return test.funcVal }},
 		}
 		s := &BrightnessFuncSlice{}
 		s.SetFuncs(funcs)
@@ -30,7 +30,7 @@ func TestBrightnessGetFuncValue(t *testing.T) {
 
 func TestWhiteLevelGetFuncValue(t *testing.T) {
 	tests := []struct {
-		funcVal float64
+		funcVal float32
 		want    uint8
 	}{
 		{1.0, 255},
@@ -40,8 +40,8 @@ func TestWhiteLevelGetFuncValue(t *testing.T) {
 
 	for _, test := range tests {
 		funcs := []transFuncer{
-			&transFunc{Period: 1, Function: func(x float64) float64 { return test.funcVal }},
-			&transFunc{Period: 1, Function: func(x float64) float64 { return test.funcVal }},
+			&transFunc{Period: 1, Function: func(x float32) float32 { return test.funcVal }},
+			&transFunc{Period: 1, Function: func(x float32) float32 { return test.funcVal }},
 		}
 		s := &WhiteLevelFuncSlice{}
 		s.SetFuncs(funcs)
@@ -53,7 +53,7 @@ func TestWhiteLevelGetFuncValue(t *testing.T) {
 
 func TestColorGetFuncValue(t *testing.T) {
 	tests := []struct {
-		funcVal   float64
+		funcVal   float32
 		color1    imageColor.RGBA
 		color2    imageColor.RGBA
 		transType TransType
@@ -72,7 +72,7 @@ func TestColorGetFuncValue(t *testing.T) {
 				0,
 				transFunc{
 					Period:   1,
-					Function: func(x float64) float64 { return test.funcVal },
+					Function: func(x float32) float32 { return test.funcVal },
 				},
 			},
 		}

@@ -6,14 +6,14 @@ import (
 
 func TestGetFuncValue(t *testing.T) {
 	tests := []struct {
-		function   func(x float64) float64
+		function   func(x float32) float32
 		period     int
-		inputRange []float64
+		inputRange []float32
 		stepNum    int
-		want       float64
+		want       float32
 	}{
-		{func(x float64) float64 { return 10 - x }, 10, []float64{0, 10}, 5, 5},
-		{func(x float64) float64 { return 10 - x }, 10, []float64{0, 10}, 17, 3},
+		{func(x float32) float32 { return 10 - x }, 10, []float32{0, 10}, 5, 5},
+		{func(x float32) float32 { return 10 - x }, 10, []float32{0, 10}, 17, 3},
 	}
 
 	for _, test := range tests {

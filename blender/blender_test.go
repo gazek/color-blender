@@ -39,7 +39,7 @@ func TestOneAtATimeColorTransition(t *testing.T) {
 	tests := []struct {
 		color1    ic.RGBA
 		color2    ic.RGBA
-		percent   float64
+		percent   float32
 		wantDist  int
 		wantColor ic.RGBA
 	}{
@@ -65,7 +65,7 @@ func TestGetTransitionColor(t *testing.T) {
 		color1    ic.RGBA
 		color2    ic.RGBA
 		transType transfunc.TransType
-		percent   float64
+		percent   float32
 		wantDist  int
 		wantColor ic.RGBA
 	}{
@@ -83,7 +83,7 @@ func TestGetTransitionColor(t *testing.T) {
 			Color2:    test.color2,
 			TransType: test.transType,
 		}
-		color := b.getTransitionColor(float64(test.percent), cf)
+		color := b.getTransitionColor(cf, test.percent)
 		if color != test.wantColor {
 			t.Errorf("Wanted %v, got: %v", test.wantColor, color)
 		}
@@ -168,14 +168,14 @@ func TestGetGetColor(t *testing.T) {
 		color1               ic.RGBA
 		color2               ic.RGBA
 		transType            transfunc.TransType
-		colorFunc            func(x float64) float64
-		colorFuncRange       []float64
+		colorFunc            func(x float32) float32
+		colorFuncRange       []float32
 		colorFuncPeriod      int
-		whiteLevelFunc       func(x float64) float64
-		whiteLevelFuncRange  []float64
+		whiteLevelFunc       func(x float32) float32
+		whiteLevelFuncRange  []float32
 		whiteLevelFuncPeriod int
-		brightnessFunc       func(x float64) float64
-		brightnessFuncRange  []float64
+		brightnessFunc       func(x float32) float32
+		brightnessFuncRange  []float32
 		brightnessFuncPeriod int
 		step                 int
 		want                 ic.RGBA
@@ -184,29 +184,29 @@ func TestGetGetColor(t *testing.T) {
 			color1:    ic.RGBA{R: 255},
 			color2:    ic.RGBA{B: 255},
 			transType: transfunc.OneAtATime,
-			colorFunc: func(x float64) float64 {
+			colorFunc: func(x float32) float32 {
 				if x < 5 {
 					return 0
 				}
 				return 1
 			},
-			colorFuncRange:  []float64{0, 10},
+			colorFuncRange:  []float32{0, 10},
 			colorFuncPeriod: 10,
-			whiteLevelFunc: func(x float64) float64 {
+			whiteLevelFunc: func(x float32) float32 {
 				if x < 5 {
 					return 0
 				}
 				return 1
 			},
-			whiteLevelFuncRange:  []float64{0, 10},
+			whiteLevelFuncRange:  []float32{0, 10},
 			whiteLevelFuncPeriod: 10,
-			brightnessFunc: func(x float64) float64 {
+			brightnessFunc: func(x float32) float32 {
 				if x < 5 {
 					return 0
 				}
 				return 1
 			},
-			brightnessFuncRange:  []float64{0, 10},
+			brightnessFuncRange:  []float32{0, 10},
 			brightnessFuncPeriod: 10,
 			step:                 0,
 			want:                 ic.RGBA{R: 255},
@@ -215,29 +215,29 @@ func TestGetGetColor(t *testing.T) {
 			color1:    ic.RGBA{R: 255},
 			color2:    ic.RGBA{B: 255},
 			transType: transfunc.OneAtATime,
-			colorFunc: func(x float64) float64 {
+			colorFunc: func(x float32) float32 {
 				if x < 5 {
 					return 0
 				}
 				return 1
 			},
-			colorFuncRange:  []float64{0, 10},
+			colorFuncRange:  []float32{0, 10},
 			colorFuncPeriod: 10,
-			whiteLevelFunc: func(x float64) float64 {
+			whiteLevelFunc: func(x float32) float32 {
 				if x < 10 {
 					return 0
 				}
 				return 1
 			},
-			whiteLevelFuncRange:  []float64{0, 10},
+			whiteLevelFuncRange:  []float32{0, 10},
 			whiteLevelFuncPeriod: 10,
-			brightnessFunc: func(x float64) float64 {
+			brightnessFunc: func(x float32) float32 {
 				if x < 5 {
 					return 0
 				}
 				return 1
 			},
-			brightnessFuncRange:  []float64{0, 10},
+			brightnessFuncRange:  []float32{0, 10},
 			brightnessFuncPeriod: 10,
 			step:                 9,
 			want:                 ic.RGBA{B: 255, A: 255},
@@ -246,29 +246,29 @@ func TestGetGetColor(t *testing.T) {
 			color1:    ic.RGBA{R: 255},
 			color2:    ic.RGBA{B: 255},
 			transType: transfunc.OneAtATime,
-			colorFunc: func(x float64) float64 {
+			colorFunc: func(x float32) float32 {
 				if x < 5 {
 					return 0
 				}
 				return 1
 			},
-			colorFuncRange:  []float64{0, 10},
+			colorFuncRange:  []float32{0, 10},
 			colorFuncPeriod: 10,
-			whiteLevelFunc: func(x float64) float64 {
+			whiteLevelFunc: func(x float32) float32 {
 				if x < 5 {
 					return 0
 				}
 				return 1
 			},
-			whiteLevelFuncRange:  []float64{0, 10},
+			whiteLevelFuncRange:  []float32{0, 10},
 			whiteLevelFuncPeriod: 10,
-			brightnessFunc: func(x float64) float64 {
+			brightnessFunc: func(x float32) float32 {
 				if x < 10 {
 					return 0
 				}
 				return 1
 			},
-			brightnessFuncRange:  []float64{0, 10},
+			brightnessFuncRange:  []float32{0, 10},
 			brightnessFuncPeriod: 10,
 			step:                 9,
 			want:                 ic.RGBA{R: 255, G: 255, B: 255, A: 0},

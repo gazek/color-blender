@@ -94,7 +94,7 @@ func TestGetFunctionValue(t *testing.T) {
 	tests := []struct {
 		periods []int
 		stepNum int
-		want    float64
+		want    float32
 	}{
 		{[]int{5, 15, 10}, 7, 15},
 		{[]int{5, 15, 10}, 33, 5},
@@ -105,10 +105,10 @@ func TestGetFunctionValue(t *testing.T) {
 	for _, test := range tests {
 		s := transFuncSlice{}
 		for f := range test.periods {
-			returnValue := float64(test.periods[f])
+			returnValue := float32(test.periods[f])
 			s.AppendFunc(&transFunc{
 				Period:   test.periods[f],
-				Function: func(x float64) float64 { return returnValue },
+				Function: func(x float32) float32 { return returnValue },
 			})
 		}
 		result, _ := s.GetFuncValue(test.stepNum)
