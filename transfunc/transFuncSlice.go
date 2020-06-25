@@ -54,7 +54,7 @@ func (s *transFuncSlice) getFunctionIndex(stepNum int) (index int, localStep int
 	// find the function index
 	boundary := 0
 	for f := range s.funcs {
-		if minStep <= boundary+s.funcs[f].GetFuncPeriod() {
+		if minStep < boundary+s.funcs[f].GetFuncPeriod() {
 			localStep = minStep - boundary
 			break
 		}

@@ -71,8 +71,8 @@ func TestGetFunctionIndex(t *testing.T) {
 	}{
 		{[]int{5, 15, 10}, 7, 1, 2},
 		{[]int{5, 15, 10}, 33, 0, 3},
-		{[]int{5, 15, 10}, 5, 0, 5},
-		{[]int{5, 15, 10}, 20, 1, 15},
+		{[]int{5, 15, 10}, 5, 1, 0},
+		{[]int{5, 15, 10}, 20, 2, 0},
 	}
 
 	for _, test := range tests {
@@ -98,8 +98,8 @@ func TestGetFunctionValue(t *testing.T) {
 	}{
 		{[]int{5, 15, 10}, 7, 15},
 		{[]int{5, 15, 10}, 33, 5},
-		{[]int{5, 15, 10}, 5, 5},
-		{[]int{5, 15, 10}, 20, 15},
+		{[]int{5, 15, 10}, 5, 15},
+		{[]int{5, 15, 10}, 20, 10},
 	}
 
 	for _, test := range tests {
